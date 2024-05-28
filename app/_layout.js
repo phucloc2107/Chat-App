@@ -1,16 +1,40 @@
 import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
-import {Slot} from "expo-router";
+import React, { useEffect } from 'react'
+import {Slot, useSegments,useRouter} from "expo-router";
 import '../global.css';
+import { AuthContextProvider, useAuth } from '../context/authContext';
 
-const _layout = () => {
-  return (
-    <View>
-      <Slot />
-    </View>
-  )
+const MainLayout = () =>{
+    const {isAuthenticated} = useAuth();
+    const segments = useSegments();
+    const router = useRouter();
+
+    useEffect(()=>{
+        //Check if user is authenticated or not 
+        if(typeof isAuthenticated=='undefined') return;
+        const inApp = segments[0]=='(app)';
+        if( isAuthenticated && !inApp) {
+            // redirect to home 
+            router.replace('home');
+        } else if(isAuthenticated==false){
+            // redirect to signIn
+            router.replace('signIn');
+        }
+    },[isAuthenticated])
+
+    return <Slot />
 }
 
-export default _layout;
+export default function RootLayout() {
+    return(
+        <AuthContextProvider>
+            <MainLayout />
+        </AuthContextProvider>
+    )
+}
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+    container:{
+        flex:1
+    }
+})
