@@ -1,23 +1,28 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  TextInput,
-  TouchableOpacity,
-  Pressable,
-} from "react-native";
-import React from "react";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
+import { StyleSheet,Text, View,Image, TextInput,TouchableOpacity, Pressable, Alert} from "react-native";
+import React, { useRef, useState } from "react";
+import { widthPercentageToDP as wp, heightPercentageToDP as hp} from "react-native-responsive-screen";
 import { StatusBar } from "expo-status-bar";
 import { Octicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import Loading from "../components/Loading";
 
 const signIn = () => {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  const emailRef = useRef("");
+  const passwordRef = useRef("");
+
+  const handleLogin = async () => {
+    if (!emailRef.current || !passwordRef.current) {
+      Alert.alert("Sign In", "Please fill all the fields!");
+      return;
+    }
+
+    // Login process
+
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
@@ -39,6 +44,7 @@ const signIn = () => {
             <View style={styles.mailInput}>
               <Octicons name="mail" size={hp(2.7)} color="gray" />
               <TextInput
+                onChangeText={value => emailRef.current = value}
                 style={styles.input}
                 placeholder="Email address"
                 placeholderTextColor={"gray"}
@@ -49,23 +55,35 @@ const signIn = () => {
               <View style={styles.mailInput}>
                 <Octicons name="lock" size={hp(2.7)} color="gray" />
                 <TextInput
+                  onChangeText={value => passwordRef.current = value}
                   style={styles.input}
                   placeholder="Password"
                   placeholderTextColor={"gray"}
+                  secureTextEntry
                 />
               </View>
               <Text style={styles.forgotInput}>Forgot password?</Text>
             </View>
 
             {/* Submit button */}
-            <TouchableOpacity style={styles.submitButton}>
-              <Text style={styles.submitText}>Sign In</Text>
-            </TouchableOpacity>
+            <View>
+              {
+                loading ? (
+                  <View style={styles.loading}>
+                    <Loading size={hp(6.5)}/>
+                  </View>
+                ) : (
+                  <TouchableOpacity style={styles.submitButton} onPress={handleLogin}>
+                    <Text style={styles.submitText}>Sign In</Text>
+                  </TouchableOpacity>
+                )
+              }
+            </View>
 
             {/* sign up text */}
             <View style={{ justifyContent: "center", flexDirection: "row" }}>
-              <Text style={{ fontSize: hp(1.8),fontWeight: "600", color: "#6B7280"}}> Don't have an account?</Text>
-              <Pressable onPress={() => router.push('signUp')}>
+              <Text style={{ fontSize: hp(1.8), fontWeight: "600", color: "#6B7280"}}> Don't have an account?</Text>
+              <Pressable onPress={() => router.push("signUp")}>
                 <Text style={{ fontSize: hp(1.8),fontWeight: "bold", color: "#6366F1"}}> Sign Up</Text>
               </Pressable>
             </View>
@@ -138,4 +156,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     letterSpacing: 1,
   },
+  loading:{
+    flexDirection:'row',
+    justifyContent:'center'
+  }
 });
