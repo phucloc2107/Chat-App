@@ -5,6 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import { Octicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import Loading from "../components/Loading";
+import CustomKeyboardView from "../components/CustomKeyboardView";
 
 const signIn = () => {
   const router = useRouter();
@@ -24,7 +25,7 @@ const signIn = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <CustomKeyboardView style={styles.container}>
       <StatusBar style="dark" />
       <View style={styles.formLogin}>
         {/* Image SignIn */}
@@ -90,7 +91,7 @@ const signIn = () => {
           </View>
         </View>
       </View>
-    </View>
+    </CustomKeyboardView>
   );
 };
 
