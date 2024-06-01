@@ -6,11 +6,12 @@ import { Octicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import Loading from "../components/Loading";
 import CustomKeyboardView from "../components/CustomKeyboardView";
+import { useAuth } from "../context/authContext";
 
 const signIn = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-
+  const {login} = useAuth();
   const emailRef = useRef("");
   const passwordRef = useRef("");
 
@@ -20,6 +21,12 @@ const signIn = () => {
       return;
     }
 
+    setLoading(true);
+    const response = await login(emailRef.current, passwordRef.current);
+    setLoading(false);
+    if (!response.success) {
+      Alert.alert('Sign In', response.msg);
+    }
     // Login process
 
   };
@@ -71,7 +78,7 @@ const signIn = () => {
               {
                 loading ? (
                   <View style={styles.loading}>
-                    <Loading size={hp(6.5)}/>
+                    <Loading size={hp(8)}/>
                   </View>
                 ) : (
                   <TouchableOpacity style={styles.submitButton} onPress={handleLogin}>
