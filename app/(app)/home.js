@@ -1,23 +1,60 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { useAuth } from '../../context/authContext'
+import { widthPercentageToDP as wp, heightPercentageToDP as hp} from "react-native-responsive-screen";
+import { StatusBar } from 'expo-status-bar';
+import ChatList from '../../components/ChatList';
+import { getDocs, query, where } from 'firebase/firestore';
+import { usersRef } from '../../firebaseConfig';
 
 const home = () => {
+  const [users, setUsers] = useState([]);
   const {logout, user} = useAuth();
-  const handleLogout = async () => {
-    await logout();
+
+  useEffect(() => {
+    if (user?.uid)
+      getUsers();
+  },[])
+
+  const getUsers = async() => {
+     // Fetch users
+     const q = query(usersRef, where('userId', '!=', user?.uid));
+     
+     const querySnapshot = await getDocs(q);
+     let data = [];
+     querySnapshot.forEach(doc => {
+       data.push({...doc.data(  )});
+      });
+     setUsers(data);
   }
-  console.log('user data: ', user);
+
   return (
-    <View>
-      <Text>home</Text>
-      <Pressable onPress={handleLogout}> 
-        <Text>Sign Out</Text>
-      </Pressable>
+    <View style={styles.container}>
+      <StatusBar style='light' />
+
+      {
+        users.length > 0 ? (
+          <ChatList users={users} />
+        ) : (
+          <View style={styles.loading}>
+            <ActivityIndicator size='large' />
+          </View>
+        )
+      }
     </View>
   )
 }
 
 export default home;
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  container:{
+    flex:1,
+    backgroundColor:'white'
+  },
+  loading:{
+    display:'flex',
+    alignItems:'center',
+    top: hp(30)
+  }
+})
