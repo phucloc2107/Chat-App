@@ -1,13 +1,51 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { widthPercentageToDP as wp, heightPercentageToDP as hp} from "react-native-responsive-screen";
 import { Image } from 'expo-image';
-import {blurhash} from '../utils/common';
+import {blurhash, formatDate, getRoomId} from '../utils/common';
+import { Timestamp, collection, doc, setDoc, addDoc, query, orderBy, onSnapshot } from 'firebase/firestore'
+import { db } from '../firebaseConfig'
 
-const ChatItems = ({item,noBorder,router}) => {
+const ChatItems = ({item,noBorder,router, currentUser}) => {
+
+    const [lassMessage, setLastMessage] = useState(undefined);
+
+    useEffect(() => {
+        let roomId = getRoomId(currentUser?.userId, item?.userId);
+        const docRef = doc(db, 'rooms', roomId);
+        const messagesRef = collection(docRef,'messages');
+        const q = query(messagesRef, orderBy('createdAt', 'desc'));
+
+        let unsub = onSnapshot(q, (snapshot) => {
+            let allMessages = snapshot.docs.map(doc=>{
+                return doc.data();
+            });
+            setLastMessage(allMessages[0]? allMessages[0]: null);
+        });
+
+        return unsub;
+    },[]);
+    //console.log('last Message: ', lassMessage)
 
   const openChatRoom = () => {
     router.push({pathname: '/chatRoom', params:item});
+  }
+
+  const renderTime = () =>{
+    if (lassMessage) {
+        let date = lassMessage?.createdAt;
+        return formatDate(new Date(date?.seconds *1000))
+    }
+    return 'Time';
+  }
+
+  const renderLastMessage = () => {
+    if(typeof lassMessage == 'undefined') return 'Loading...';
+    if (lassMessage) {
+        if(currentUser?.userId == lassMessage?.userId) return "You: " + lassMessage?.text
+    }else {
+        return 'Say Hi 👋';
+    }
   }
 
   return (
@@ -24,10 +62,10 @@ const ChatItems = ({item,noBorder,router}) => {
         <View style={{flex:1, gap:1}}>
             <View style={{flexDirection:'row',justifyContent:'space-between'}}>
                 <Text style={styles.textName}>{item?.username}</Text>
-                <Text style={styles.textTime}>Time</Text>
+                <Text style={styles.textTime}>{renderTime()}</Text>
             </View>
 
-            <Text style={styles.textTime}>Last Message</Text>
+            <Text style={styles.textTime}>{renderLastMessage()}</Text>
         </View>
     </TouchableOpacity>
   )

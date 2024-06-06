@@ -2,9 +2,9 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import MessageItem from './MessageItem'
 
-const MessagesList = ({messages, currentUser}) => {
+const MessagesList = ({messages, currentUser, scrollViewRef}) => {
   return (
-    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{paddingTop:10}}>
+    <ScrollView ref={scrollViewRef} showsVerticalScrollIndicator={false} contentContainerStyle={{paddingTop:10}}>
       {
         messages.map((message, index) => {
           return(

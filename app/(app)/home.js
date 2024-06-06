@@ -34,7 +34,7 @@ const home = () => {
 
       {
         users.length > 0 ? (
-          <ChatList users={users} />
+          <ChatList currentUser={user} users={users} />
         ) : (
           <View style={styles.loading}>
             <ActivityIndicator size='large' />

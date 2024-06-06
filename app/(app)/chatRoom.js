@@ -1,4 +1,4 @@
-import { Alert, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { Alert, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View ,Keyboard} from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import ChatRoomHeader from '../../components/ChatRoomHeader'
@@ -18,6 +18,7 @@ const chatRoom = () => {
     const {user} = useAuth(); // logged in user
     const textRef = useRef('');
     const inputRef = useRef(null);
+    const scrollViewRef = useRef(null)
 
     useEffect(() => {
         createRoomIfNotExists();
@@ -34,8 +35,25 @@ const chatRoom = () => {
             setMessages([...allMessages])
         });
 
-        return unsub;
+        const KeyboardDidShowListener = Keyboard.addListener(
+            'keyboardDidShow', updateScrollView
+        )
+
+        return () => {
+            unsub();
+            KeyboardDidShowListener.remove();
+        };
     },[]);
+
+    useEffect(() => {
+        updateScrollView()
+    },[messages])
+
+    const updateScrollView = () => {
+        setTimeout(() => {
+            scrollViewRef?.current?.scrollToEnd({animated: true})
+        },100)
+    }
 
     const createRoomIfNotExists = async() => {
         // roomID
@@ -76,7 +94,7 @@ const chatRoom = () => {
         <View style={styles.headerBottomLine}></View>
         <View style={styles.message}>
             <View style={{flex:1}}>
-                <MessagesList messages={messages} currentUser={user} />
+                <MessagesList scrollViewRef={scrollViewRef} messages={messages} currentUser={user} />
             </View>
             <View style={styles.messageFooter}>
                     <View style={styles.chatMessage}>
